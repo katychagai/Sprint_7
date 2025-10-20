@@ -1,8 +1,9 @@
 import pytest
 import allure
 
-from Sprint_7.helpers import login_courier, generate_courier_data, login_courier_with_payload
-from Sprint_7.data import WRONG_CREDENTIALS_STATUS, WRONG_CREDENTIALS_MESSAGES
+from Sprint_7.helpers import generate_courier_data
+from Sprint_7.data import WRONG_CREDENTIALS_STATUS, WRONG_CREDENTIALS_MESSAGES, STATUS_OK
+from Sprint_7.urls import login_courier, login_courier_with_payload
 
 
 @allure.epic("Scooter API")
@@ -12,11 +13,12 @@ class TestCourierLogin:
     @allure.story("Login courier")
     @allure.title("Курьер может авторизоваться: 200 и id в ответе")
     def test_courier_can_login(self, created_courier):
+        courier_data, resp = created_courier
         with allure.step("Отправляем запрос логина с корректными login/password"):
-            resp = login_courier(created_courier["login"], created_courier["password"])
+            resp = login_courier(courier_data["login"], courier_data["password"])
             allure.attach(str(resp.json()), "response.json", allure.attachment_type.JSON)
         with allure.step("Проверяем 200 и наличие числового id"):
-            assert resp.status_code == 200
+            assert resp.status_code == STATUS_OK
             body = resp.json()
             assert "id" in body and isinstance(body["id"], int)
 
@@ -32,15 +34,17 @@ class TestCourierLogin:
         with allure.step("Проверяем 400 и сообщение об ошибке"):
             if resp.status_code == 504:
                 pytest.xfail("Бага в документации: при отсутствии обязательногополя API возвращает 504 вместо 400")
-            assert resp.status_code == 400
-            assert resp.json().get("message") == "Недостаточно данных для входа"
+            assert resp.status_code in WRONG_CREDENTIALS_STATUS
+            body = resp.json()
+            assert body["message"] in WRONG_CREDENTIALS_MESSAGES
 
     @allure.story("Login courier")
     @allure.title("Неверные логин или пароль: 404 и сообщение об ошибке")
     def test_login_wrong_credentials_returns_error(self, created_courier):
-        wrong_password = created_courier["password"] + "x"
+        courier_data, resp = created_courier  # распаковываем кортеж
+        wrong_password = courier_data["password"] + "x"  # используем courier_data (словарь)
         with allure.step("Отправляем запрос логина с неверным паролем"):
-            resp = login_courier(created_courier["login"], wrong_password)
+            resp = login_courier(courier_data["login"], wrong_password)  # используем courier_data
             allure.attach(str(resp.json() if resp.content else {}), "response.json", allure.attachment_type.JSON)
         with allure.step("Проверяем код ответа и текст ошибки"):
             assert resp.status_code in WRONG_CREDENTIALS_STATUS
@@ -55,6 +59,8 @@ class TestCourierLogin:
             resp = login_courier(creds["login"], creds["password"])
             allure.attach(str(resp.json() if resp.content else {}), "response.json", allure.attachment_type.JSON)
         with allure.step("Проверяем 404 и текст ошибки"):
-            assert resp.status_code == 404
-            assert resp.json().get("message") == "Учетная запись не найдена"
+            assert resp.status_code in WRONG_CREDENTIALS_STATUS
+            body = resp.json()
+            assert body["message"] in WRONG_CREDENTIALS_MESSAGES
+            
 

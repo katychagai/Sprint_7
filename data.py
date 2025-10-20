@@ -12,6 +12,13 @@ DUPLICATE_LOGIN_MESSAGES = [
     "Этот логин уже используется. Попробуйте другой.",
 ]
 
+# Допустимые варианты ответа при успешном запросе
+STATUS_OK = 200
+STATUS_CREATED = 201
+STATUS_DUPLICATE = 409
+STATUS_MISSING = 400
+STATUS_WRONG = 404
+
 # Допустимые варианты ответа при неверной паре логин/пароль
 WRONG_CREDENTIALS_STATUS = [404, 400]
 WRONG_CREDENTIALS_MESSAGES = [
@@ -19,6 +26,9 @@ WRONG_CREDENTIALS_MESSAGES = [
     "Недостаточно данных для входа",
     "Неверный логин или пароль",
 ]
+
+# Пропущенно поле при создании заказа
+MISSING_FIELDS_FOR_CREATE_COURIER = "Недостаточно данных для создания учетной записи"
 
 # Параметризация цветов заказа
 ORDER_COLORS = [

@@ -1,13 +1,13 @@
 import pytest
 import allure
 
-from Sprint_7.helpers import create_order
-from Sprint_7.data import ORDER_COLORS
+from Sprint_7.urls import create_order
+from Sprint_7.data import ORDER_COLORS, STATUS_CREATED
 
 
 @allure.epic("Scooter API")
 @allure.feature("Orders")
-class TestCreateOrder:
+class TestOrderCreation:
     
     @allure.story("Create order")
     @pytest.mark.parametrize("colors", ORDER_COLORS)
@@ -19,7 +19,7 @@ class TestCreateOrder:
             body = resp.json()
             allure.attach(str(body), "response.json", allure.attachment_type.JSON)
         with allure.step("Проверяем 201 и наличие track"):
-            assert resp.status_code == 201
+            assert resp.status_code == STATUS_CREATED
             assert "track" in body and isinstance(body["track"], int)
 
 
