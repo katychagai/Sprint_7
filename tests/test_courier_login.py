@@ -1,9 +1,9 @@
 import pytest
 import allure
 
-from Sprint_7.helpers import generate_courier_data, create_courier
-from Sprint_7.data import WRONG_CREDENTIALS_STATUS, WRONG_CREDENTIALS_MESSAGES, STATUS_OK
-from Sprint_7.urls import login_courier, login_courier_with_payload
+from Sprint_7.helpers import generate_courier_data
+from Sprint_7.data import STATUS_CREATED, WRONG_CREDENTIALS_STATUS, WRONG_CREDENTIALS_MESSAGES, STATUS_OK
+from Sprint_7.urls import login_courier, login_courier_with_payload, create_courier
 
 
 @allure.epic("Scooter API")
@@ -12,11 +12,13 @@ class TestCourierLogin:
     
     @allure.story("Login courier")
     @allure.title("Курьер может авторизоваться: 200 и id в ответе")
-    def test_courier_can_login(self):
+    def test_courier_can_login(self, courier_cleanup):
+        
         courier_data = generate_courier_data()
         with allure.step("Создаем курьера для теста"):
             create_resp = create_courier(courier_data)
-            assert create_resp.status_code == 201
+            assert create_resp.status_code == STATUS_CREATED
+        
         with allure.step("Отправляем запрос логина с корректными login/password"):
             resp = login_courier(courier_data["login"], courier_data["password"])
             allure.attach(str(resp.json()), "response.json", allure.attachment_type.JSON)
@@ -24,6 +26,7 @@ class TestCourierLogin:
             assert resp.status_code == STATUS_OK
             body = resp.json()
             assert "id" in body and isinstance(body["id"], int)
+            courier_cleanup(courier_data)
 
 
     @allure.story("Login courier")
@@ -44,11 +47,13 @@ class TestCourierLogin:
 
     @allure.story("Login courier")
     @allure.title("Неверные логин или пароль: 404 и сообщение об ошибке")
-    def test_login_wrong_credentials_returns_error(self):
+    def test_login_wrong_credentials_returns_error(self, courier_cleanup):
+        
         courier_data = generate_courier_data()
         with allure.step("Создаем курьера для теста"):
             create_resp = create_courier(courier_data)
-            assert create_resp.status_code == 201
+            assert create_resp.status_code == STATUS_CREATED
+        
         wrong_password = courier_data["password"] + "x"
         with allure.step("Отправляем запрос логина с неверным паролем"):
             resp = login_courier(courier_data["login"], wrong_password)
@@ -57,6 +62,7 @@ class TestCourierLogin:
             assert resp.status_code in WRONG_CREDENTIALS_STATUS
             body = resp.json()
             assert body["message"] in WRONG_CREDENTIALS_MESSAGES
+            courier_cleanup(courier_data)
 
 
     @allure.story("Login courier")

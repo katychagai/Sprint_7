@@ -1,5 +1,3 @@
-import pytest
-
 # Обязательные поля для создания курьера
 MISSING_REQUIRED_FIELDS = [
     "login",
@@ -17,7 +15,6 @@ STATUS_OK = 200
 STATUS_CREATED = 201
 STATUS_DUPLICATE = 409
 STATUS_MISSING = 400
-STATUS_WRONG = 404
 
 # Допустимые варианты ответа при неверной паре логин/пароль
 WRONG_CREDENTIALS_STATUS = [404, 400]
@@ -32,10 +29,10 @@ MISSING_FIELDS_FOR_CREATE_COURIER = "Недостаточно данных дл�
 
 # Параметризация цветов заказа
 ORDER_COLORS = [
-    pytest.param(["BLACK"], id="BLACK"),
-    pytest.param(["GREY"], id="GREY"),
-    pytest.param(["BLACK", "GREY"], id="BOTH"),
-    pytest.param(None, id="NO_COLOR"),
+    ["BLACK"],
+    ["GREY"],
+    ["BLACK", "GREY"],
+    None,
 ]
 
 
